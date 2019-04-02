@@ -1,1 +1,5 @@
 # SmashPowerRankingGenerator
+
+## Requirements:
+
+*#TODO*
