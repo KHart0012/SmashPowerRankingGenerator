@@ -1,2 +1,4 @@
 access_data.py
 credientials.json
+client_secret.json
+*.pickle
