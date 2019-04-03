@@ -5,4 +5,6 @@ Created on Mon Apr  1 18:33:40 2019
 @author: Kevin Hart
 """
 
+import challonge_handler
+import spreedsheet_handler
 
