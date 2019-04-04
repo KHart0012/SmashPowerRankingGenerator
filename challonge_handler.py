@@ -20,10 +20,10 @@ def grab_matches(tourn_str):
 def grab_participants(tourn_str):
     return challonge.participants.index(grab_tournament(tourn_str)['id'])
     
-def participants_list(participants):
+def list_participants(participants):
     parti_list = []
     for parti in participants:
-        parti_list.append(parti['id'])
+        parti_list.append(parti['name'])
     return parti_list
 
 def participant_name(participants, p_id):
@@ -51,7 +51,7 @@ def determine_matchups(participants, matches, top):
                     point_changes[p2] -= 10 * score[1]
                     point_changes[p1] += 5 * score[1]
             # Checks if someone in top 3-5 lost to someone outside of top 3-5
-            if p1 in top[2:5] or p2 in top[2:5]:
+            elif p1 in top[2:5] or p2 in top[2:5]:
                 if p1 in top[2:5] and not p2 in top[:5] and score[3] > 0:
                     point_changes[p1] -= 5 * score[3]
                     point_changes[p2] += 3 * score[3]
@@ -59,7 +59,7 @@ def determine_matchups(participants, matches, top):
                     point_changes[p2] -= 5 * score[1]
                     point_changes[p1] += 3 * score[1]
             # Checks if someone beats someone in top 10 if top 10
-            if p1 in top[5:10] or p2 in top[5:10]:
+            elif p1 in top[5:10] or p2 in top[5:10]:
                 if p1 in top[5:10] and not p2 in top[:10]:
                     point_changes[p2] += 2 * score[3]
                 elif p2 in top[5:10] and not p1 in top[:10]:
@@ -140,17 +140,9 @@ def calc_player_pts(num_people, rank):
 
 def calculate_scores(participants, matches, top):
     scores = adjust_for_matchups(calculate_rank_points(participants), determine_matchups(participants, matches, top))
-    return scores
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
-def grab_scores(tourn_str):
+def grab_scores(tourn_str, top):
     matches = grab_matches(tourn_str)
     partics = grab_participants(tourn_str)
-    top = [parti['name'] for parti in sorted(partics, key=lambda x: x['final-rank'])][:10]
-    #print(top)
     return calculate_scores(partics, matches, top)
-
-# Main
-initialize_challonge()
-TOURN_STR = 'lya9ste8' #'uz7g78vq'
-scores = grab_scores(TOURN_STR)
-print(scores)
