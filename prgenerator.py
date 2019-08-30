@@ -8,6 +8,7 @@ Created on Mon Apr  1 18:33:40 2019
 from challonge_handler import initialize_challonge, grab_scores
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from screen_states import ScreenStates
 
 def first_time_run(tourn_str, top_cells):
     top = [cell.value for cell in top_cells]
@@ -45,13 +46,37 @@ def update_top(pr, top_cells, scores):
         top_cells[i].value = score[0]
         i += 1
     pr.update_cells(top_cells)
+
+def display_options(screen_state):
+    
+
+def main():
+    # Setting up and authorizing access to Google Spreadsheets
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
+    gc = gspread.authorize(creds)
+    pr = gc.open('Smash Ultimate Power Rankings').sheet1
+    
+    # Initializes Challonge
+    initialize_challonge()
+    
+    # Variables that User might use
+    user_input = ''
+    tourn_str = ''
+    
+    # Spreadsheet cells
+    top_cells = pr.range(3, 5, 12, 5)
+    
+    # Main loop
+    while user_input.lower() != 'exit':
         
-# Main
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
-gc = gspread.authorize(creds)
-pr = gc.open('Smash Ultimate Power Rankings').sheet1
-initialize_challonge()
+        user_input = input()
+
+
+
+if __name__ == '__main__':
+    main()
+    
 '''
 TOURN_STR = 'utn1lyez'
 top_cells = pr.range(3, 5, 12, 5)
