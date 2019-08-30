@@ -9,4 +9,5 @@ from enum import Enum, auto
 
 class ScreenStates(Enum):
     MAIN_MENU = auto()
-    
+    UPDATE_SCORES = auto()
+    ROLLOVER_SEASON = auto()

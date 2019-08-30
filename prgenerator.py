@@ -47,8 +47,24 @@ def update_top(pr, top_cells, scores):
         i += 1
     pr.update_cells(top_cells)
 
-def display_options(screen_state):
+def display_options(screen_state, options):
+    i = 0
+    '''
+    if screen_state == ScreenStates.MAIN_MENU:
+        state = 0
+    elif screen_state == ScreenStates.UPDATE_SCORES:
+        state = 1
+    elif screen_state == ScreenStates.ROLLOVER_SEASON:
+        state = 2
+    '''
     
+    for option in options[screen_state]:
+        print('[' + str(i + 1) + '] ' + option)
+        i += 1
+
+def handle_input(user_input, option):
+    return
+          
 
 def main():
     # Setting up and authorizing access to Google Spreadsheets
@@ -60,8 +76,16 @@ def main():
     # Initializes Challonge
     initialize_challonge()
     
-    # Variables that User might use
+    # Constants
+    screen_state = ScreenStates.MAIN_MENU
+    mm_options = ['First Time Setup', 'Update Scores', 'Rollover PR Season', 'Exit']
+    us_options = ['Add Completed Tournament', 'Back']
+    rs_options = ['Update Top 10', 'Back']
+    options = [mm_options, us_options, rs_options]
+    
+    # Variables
     user_input = ''
+    option_str = ''
     tourn_str = ''
     
     # Spreadsheet cells
@@ -69,7 +93,7 @@ def main():
     
     # Main loop
     while user_input.lower() != 'exit':
-        
+        display_options(screen_state, options)
         user_input = input()
 
 
