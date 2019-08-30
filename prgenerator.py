@@ -34,22 +34,31 @@ def updated_scores(tourn_str, cells, top_cells):
 
 def grab_current_scores(cells):
     prev = []
-    for i in range(1, len(cells)):
+    for i in range(2, len(cells)):
         prev.append((cells[i][1], int(cells[i][2])))
     return prev
-  
+
+
+def update_top(pr, top_cells, scores):
+    i = 0
+    for score in scores[:10]:
+        top_cells[i].value = score[0]
+        i += 1
+    pr.update_cells(top_cells)
+        
 # Main
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
 gc = gspread.authorize(creds)
 pr = gc.open('Smash Ultimate Power Rankings').sheet1
 initialize_challonge()
+'''
 TOURN_STR = 'utn1lyez'
-top_cells = pr.range(2, 5, 11, 5)
+top_cells = pr.range(3, 5, 12, 5)
 #scores = first_time_run(TOURN_STR, top_cells)
 scores = updated_scores(TOURN_STR, pr.get_all_values(), top_cells)
-name_cells = pr.range(2, 2, len(scores), 2)
-score_cells = pr.range(2, 3, len(scores), 3)
+name_cells = pr.range(3, 2, len(scores), 2)
+score_cells = pr.range(3, 3, len(scores), 3)
 c = 0
 for cell in name_cells:
     cell.value = scores[c][0].capitalize()
@@ -61,7 +70,7 @@ for cell in score_cells:
     c += 1
 pr.update_cells(score_cells)
 
-'''
+
 initialize_challonge()
 TOURN_STR = '2oalxh0'
 #top = ['Zekken', 'Cloudhead', 'Siebz', 'Tribli', 'AstroKoolaid' ,'ProtoSoul', 'YDIC', 'Marzz', 'SWVY', 'Ecocide']
