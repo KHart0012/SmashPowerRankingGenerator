@@ -78,7 +78,7 @@ def main():
     
     # Constants
     screen_state = ScreenStates.MAIN_MENU
-    mm_options = ['First Time Setup', 'Update Scores', 'Rollover PR Season', 'Exit']
+    mm_options = ['Update Scores', 'Rollover PR Season', 'First Time Setup', 'Exit']
     us_options = ['Add Completed Tournament', 'Back']
     rs_options = ['Update Top 10', 'Back']
     options = [mm_options, us_options, rs_options]
