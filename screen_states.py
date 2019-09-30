@@ -11,3 +11,4 @@ class ScreenStates(Enum):
     MAIN_MENU = auto()
     UPDATE_SCORES = auto()
     ROLLOVER_SEASON = auto()
+    FIRST_SETUP = auto()

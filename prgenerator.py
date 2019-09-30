@@ -47,23 +47,37 @@ def update_top(pr, top_cells, scores):
         i += 1
     pr.update_cells(top_cells)
 
-def display_options(screen_state, options):
+def display_options(options, screen_state):
     i = 0
-    '''
-    if screen_state == ScreenStates.MAIN_MENU:
-        state = 0
-    elif screen_state == ScreenStates.UPDATE_SCORES:
-        state = 1
-    elif screen_state == ScreenStates.ROLLOVER_SEASON:
-        state = 2
-    '''
-    
     for option in options[screen_state]:
         print('[' + str(i + 1) + '] ' + option)
         i += 1
 
-def handle_input(user_input, option):
-    return
+def handle_input(user_input, screen_state):
+    try:
+        int(user_input)
+    except ValueError:
+        return screen_state
+    
+    # Options for Main Menu
+    if screen_state == ScreenStates.MAIN_MENU:
+        return ScreenStates.MAIN_MENU
+
+    # Options for Update Scores
+    elif screen_state == ScreenStates.UPDATE_SCORES:
+        return ScreenStates.UPDATE_SCORES
+
+    # Options for Rollover PR Season
+    elif screen_state == ScreenStates.ROLLOVER_SEASON:
+        return ScreenStates.ROLLOVER_SEASON
+
+    # Options for First Time Setup
+    elif screen_state == ScreenStates.FIRST_SETUP:
+        return ScreenStates.FIRST_SETUP
+
+    # If screen state is invaild, then it will just send us back to main menu
+    else:
+        return ScreenStates.MAIN_MENU
           
 
 def main():
@@ -79,9 +93,10 @@ def main():
     # Constants
     screen_state = ScreenStates.MAIN_MENU
     mm_options = ['Update Scores', 'Rollover PR Season', 'First Time Setup', 'Exit']
-    us_options = ['Add Completed Tournament', 'Back']
+    us_options = ['Add Completed Tournament', 'First Completed Tournament', 'Back']
     rs_options = ['Update Top 10', 'Back']
-    options = [mm_options, us_options, rs_options]
+    fs_options = ['Google Stuff', 'Back']
+    options = [mm_options, us_options, rs_options, fs_options]
     
     # Variables
     user_input = ''
@@ -92,9 +107,10 @@ def main():
     top_cells = pr.range(3, 5, 12, 5)
     
     # Main loop
-    while user_input.lower() != 'exit':
-        display_options(screen_state, options)
+    while user_input.lower() != 'exit' or user_input.lower() != 'quit':
+        display_options(options, screen_state)
         user_input = input()
+        screen_state = handle_input(user_input, screen_state)
 
 
 
