@@ -14,6 +14,7 @@ def first_time_run(tourn_str, top_cells):
     top = [cell.value for cell in top_cells]
     return grab_scores(tourn_str, top)
 
+
 def updated_scores(tourn_str, cells, top_cells):
     prev_scores = grab_current_scores(cells)
     top = [cell.value for cell in top_cells]
@@ -48,36 +49,80 @@ def update_top(pr, top_cells, scores):
     pr.update_cells(top_cells)
 
 def display_options(options, screen_state):
-    i = 0
-    for option in options[screen_state]:
-        print('[' + str(i + 1) + '] ' + option)
-        i += 1
+    if screen_state <= ScreenStates.FIRST_SETUP:
+        i = 0
+        for option in options[screen_state]:
+            print('[' + str(i + 1) + '] ' + option)
+            i += 1
+    
+    elif screen_state == ScreenStates.ADD_TOURN:
+        print('Enter the Tournament String: ', end='')
 
 def handle_input(user_input, screen_state):
+    string = False
+    number = False
+    tourn_str = ''
+
     try:
         int(user_input)
+        number = True
     except ValueError:
-        return screen_state
+        string = True
+        continue
     
-    # Options for Main Menu
-    if screen_state == ScreenStates.MAIN_MENU:
-        return ScreenStates.MAIN_MENU
+    """ 
+    If value if number, either person is selecting a new screen or inputing specific value
+    This will handle all numerical inputs
+    """
+    if number:
+        
+        # Options for Main Menu
+        if screen_state == ScreenStates.MAIN_MENU:
+            if user_input == 1:
+                return ScreenStates.UPDATE_SCORES
+            elif user_input == 2:
+                return ScreenStates.ROLLOVER_SEASON
+            elif user_input == 3:
+                return ScreenStates.FIRST_SETUP
+            elif user_input == 4:
+                return ScreenStates.EXIT_PROG
+            return ScreenStates.MAIN_MENU
 
-    # Options for Update Scores
-    elif screen_state == ScreenStates.UPDATE_SCORES:
-        return ScreenStates.UPDATE_SCORES
+        # Options for Update Scores
+        elif screen_state == ScreenStates.UPDATE_SCORES:
+            if user_input == 1:
+                return ScreenStates.ADD_TOURN
+            elif user_input == 2:
+                return ScreenStates.FIRST_TOURN
+            elif user_input == 3:
+                return ScreenStates.MAIN_MENU
+            return ScreenStates.UPDATE_SCORES
 
-    # Options for Rollover PR Season
-    elif screen_state == ScreenStates.ROLLOVER_SEASON:
-        return ScreenStates.ROLLOVER_SEASON
+        # Options for Rollover PR Season
+        elif screen_state == ScreenStates.ROLLOVER_SEASON:
+            if user_input == 1:
+                return ScreenStates.UPDATE_TOP
+            elif user_input == 2:
+                return ScreenStates.MAIN_MENU
+            return ScreenStates.ROLLOVER_SEASON
 
-    # Options for First Time Setup
-    elif screen_state == ScreenStates.FIRST_SETUP:
-        return ScreenStates.FIRST_SETUP
+        # Options for First Time Setup
+        elif screen_state == ScreenStates.FIRST_SETUP:
+            if user_input == 1:
+                return ScreenStates.GOOGLE_SETUP
+            elif user_input == 2:
+                return ScreenStates.MAIN_MENU
+            return ScreenStates.FIRST_SETUP
 
-    # If screen state is invaild, then it will just send us back to main menu
-    else:
-        return ScreenStates.MAIN_MENU
+        # If screen state is invaild, then it will just send us back to main menu
+        else:
+            return ScreenStates.MAIN_MENU
+
+    if string:
+
+        # Options for Add completed Tournament
+        if screen_state == ScreenStates.ADD_TOURN:
+            
           
 
 def main():
@@ -100,8 +145,6 @@ def main():
     
     # Variables
     user_input = ''
-    option_str = ''
-    tourn_str = ''
     
     # Spreadsheet cells
     top_cells = pr.range(3, 5, 12, 5)

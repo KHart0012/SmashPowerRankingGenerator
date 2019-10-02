@@ -12,3 +12,8 @@ class ScreenStates(Enum):
     UPDATE_SCORES = auto()
     ROLLOVER_SEASON = auto()
     FIRST_SETUP = auto()
+    ADD_TOURN = auto()
+    FIRST_TOURN = auto()
+    UPDATE_TOP = auto()
+    GOOGLE_SETUP = auto()
+    EXIT_PROG = auto()
