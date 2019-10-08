@@ -17,3 +17,7 @@ class ScreenStates(Enum):
     UPDATE_TOP = auto()
     GOOGLE_SETUP = auto()
     EXIT_PROG = auto()
+    VALID_INPUT_ADD = auto()
+    INVALID_INPUT_ADD = auto()
+    VALID_INPUT_FIRST = auto()
+    INVALID_INPUT_FIRST = auto()

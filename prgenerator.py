@@ -5,7 +5,7 @@ Created on Mon Apr  1 18:33:40 2019
 @author: Kevin Hart
 """
 
-from challonge_handler import initialize_challonge, grab_scores
+from challonge_handler import initialize_challonge, grab_scores, grab_tournament
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from screen_states import ScreenStates
@@ -55,13 +55,27 @@ def display_options(options, screen_state):
             print('[' + str(i + 1) + '] ' + option)
             i += 1
     
-    elif screen_state == ScreenStates.ADD_TOURN:
+    elif screen_state == ScreenStates.ADD_TOURN or screen_state == ScreenStates.FIRST_TOURN:
         print('Enter the Tournament String: ', end='')
+    
+    elif screen_state == ScreenStates.VALID_INPUT_ADD or screen_state == ScreenStates.VALID_INPUT_FIRST:
+        print('Tournament String is Valid! Power Rankings have been updated!')
+    
+    elif screen_state == ScreenStates.INVALID_INPUT_ADD or screen_state == ScreenStates.INVALID_INPUT_FIRST:
+        print('That tournament string is not valid, please re-enter the tournament string.\n')
+
+def validate_input(tourn_str):
+    if grab_tournament(tourn_str):
+        return True
+    return False
 
 def handle_input(user_input, screen_state):
     string = False
     number = False
-    tourn_str = ''
+    
+    
+    if screen_state == ScreenStates.VALID_INPUT_FIRST or screen_state == ScreenStates.VALID_INPUT_ADD:
+        return ScreenStates.UPDATE_SCORES
 
     try:
         int(user_input)
@@ -118,10 +132,31 @@ def handle_input(user_input, screen_state):
         else:
             return ScreenStates.MAIN_MENU
 
-    if string:
+    '''
+    Handles all string inputs
+    '''
+    elif string:
+        if screen_state == ScreenStates.MAIN_MENU:
+            if user_input.lower() == 'exit' or user_input.lower() == 'quit':
+                return screen_state.EXIT_PROG
 
         # Options for Add completed Tournament
-        if screen_state == ScreenStates.ADD_TOURN:
+        elif screen_state == ScreenStates.ADD_TOURN:
+            if validate_input(user_input):
+                return ScreenStates.VALID_INPUT_ADD
+            return ScreenStates.INVALID_INPUT_ADD
+        
+        elif screen_state == ScreenStates.INVALID_INPUT_ADD:
+            return ScreenStates.ADD_TOURN
+
+        elif screen_state == ScreenStates.FIRST_TOURN:
+            if validate_input(user_input):
+                return ScreenStates.VALID_INPUT_FIRST
+            return ScreenStates.INVALID_INPUT_FIRST
+        
+        elif screen_state == ScreenStates.INVALID_INPUT_FIRST:
+            return ScreenStates.FIRST_TOURN
+
             
           
 
@@ -150,10 +185,13 @@ def main():
     top_cells = pr.range(3, 5, 12, 5)
     
     # Main loop
-    while user_input.lower() != 'exit' or user_input.lower() != 'quit':
+    while screen_state != ScreenStates.EXIT_PROG:
         display_options(options, screen_state)
-        user_input = input()
+        if screen_state != ScreenStates.VALID_INPUT_ADD or screen_state != ScreenStates.VALID_INPUT_FIRST: 
+            user_input = input()
         screen_state = handle_input(user_input, screen_state)
+    
+    exit()
 
 
 
