@@ -17,27 +17,52 @@ def first_time_run(tourn_str, top_cells):
 
 def updated_scores(tourn_str, cells, top_cells):
     prev_scores = grab_current_scores(cells)
-    top = [cell.value for cell in top_cells]
+    top = [str(cell.value) for cell in top_cells]
     curr_scores = grab_scores(tourn_str, top)
     
     player_dict = dict()
     
     for i in range(len(prev_scores)):
-        player_dict[prev_scores[i][0].lower()] = prev_scores[i][1]
+        try:
+            player_dict[prev_scores[i][0].lower()] = int(prev_scores[i][1])
+        except:
+            pass
     
     for i in range(len(curr_scores)):
         if curr_scores[i][0].lower() in player_dict.keys():
-            player_dict[curr_scores[i][0].lower()] += curr_scores[i][1]
+            player_dict[curr_scores[i][0].lower()] += int(curr_scores[i][1])
         else:
-            player_dict[curr_scores[i][0].lower()] = curr_scores[i][1]
+            player_dict[curr_scores[i][0].lower()] = int(curr_scores[i][1])
         
     return sorted(player_dict.items(), key=lambda x: x[1], reverse=True)
     
 
+def update_scores(pr, scores):
+    rank_cells = pr.range(3, 1, 2 + len(scores), 1)
+    name_cells = pr.range(3, 2, 2 + len(scores), 2)
+    score_cells = pr.range(3, 3, 2 + len(scores), 3)
+    c = 1
+    for cell in rank_cells:
+        cell.value = c
+        c += 1
+    pr.update_cells(rank_cells)
+    c = 0
+    for cell in name_cells:
+        cell.value = scores[c][0].capitalize()
+        c += 1
+    pr.update_cells(name_cells)
+    c = 0
+    for cell in score_cells:
+        cell.value = scores[c][1]
+        c += 1
+    pr.update_cells(score_cells)
+    
+
+
 def grab_current_scores(cells):
     prev = []
-    for i in range(2, len(cells)):
-        prev.append((cells[i][1], int(cells[i][2])))
+    for i in range(len(cells)):
+        prev.append((cells[i][1], cells[i][2]))
     return prev
 
 
@@ -48,46 +73,83 @@ def update_top(pr, top_cells, scores):
         i += 1
     pr.update_cells(top_cells)
 
+
+def clear_scores(pr):
+    prev_scores = grab_current_scores(pr.get_all_values())
+    rank_cells = pr.range(3, 1, len(prev_scores), 1)
+    name_cells = pr.range(3, 2, len(prev_scores), 2)
+    score_cells = pr.range(3, 3, len(prev_scores), 3)
+    c = 0
+    for cell in rank_cells:
+        cell.value = ''
+        c += 1
+    pr.update_cells(rank_cells)
+    c = 0
+    for cell in name_cells:
+        cell.value = ''
+        c += 1
+    pr.update_cells(name_cells)
+    c = 0
+    for cell in score_cells:
+        cell.value = ''
+        c += 1
+    pr.update_cells(score_cells)
+    
+    
+    
+
+'''
+def add_completed_tournament(tourn_str):
+    scores =
+    
+    name_cells = pr.range(3, 2, len(scores), 2)
+    score_cells = pr.range(3, 3, len(scores), 3)
+'''
+
 def display_options(options, screen_state):
-    if screen_state <= ScreenStates.FIRST_SETUP:
+    if screen_state in options[len(options) - 1]:
         i = 0
-        for option in options[screen_state]:
+        for option in options[screen_state.value]:
             print('[' + str(i + 1) + '] ' + option)
             i += 1
     
     elif screen_state == ScreenStates.ADD_TOURN or screen_state == ScreenStates.FIRST_TOURN:
-        print('Enter the Tournament String: ', end='')
+        print('Enter the Tournament String: ')
     
     elif screen_state == ScreenStates.VALID_INPUT_ADD or screen_state == ScreenStates.VALID_INPUT_FIRST:
         print('Tournament String is Valid! Power Rankings have been updated!')
     
     elif screen_state == ScreenStates.INVALID_INPUT_ADD or screen_state == ScreenStates.INVALID_INPUT_FIRST:
-        print('That tournament string is not valid, please re-enter the tournament string.\n')
+        print('That tournament string is not valid, please re-enter the tournament string:\n')
 
 def validate_input(tourn_str):
-    if grab_tournament(tourn_str):
+    try:
+        grab_tournament(tourn_str)
         return True
-    return False
+    except:
+        return False
 
 def handle_input(user_input, screen_state):
-    string = False
+    text = False
     number = False
     
+    print(screen_state)
     
     if screen_state == ScreenStates.VALID_INPUT_FIRST or screen_state == ScreenStates.VALID_INPUT_ADD:
         return ScreenStates.UPDATE_SCORES
 
     try:
-        int(user_input)
+        user_input = int(user_input)
         number = True
     except ValueError:
-        string = True
-        continue
-    
-    """ 
+        text = True
+        pass        
+
+    """
     If value if number, either person is selecting a new screen or inputing specific value
     This will handle all numerical inputs
     """
+
     if number:
         
         # Options for Main Menu
@@ -132,19 +194,18 @@ def handle_input(user_input, screen_state):
         else:
             return ScreenStates.MAIN_MENU
 
-    '''
-    Handles all string inputs
-    '''
-    elif string:
-        if screen_state == ScreenStates.MAIN_MENU:
-            if user_input.lower() == 'exit' or user_input.lower() == 'quit':
-                return screen_state.EXIT_PROG
+    # Handles all string inputs
+    elif text:
+        if user_input.lower() == 'exit' or user_input.lower() == 'quit':
+            return screen_state.EXIT_PROG
 
         # Options for Add completed Tournament
         elif screen_state == ScreenStates.ADD_TOURN:
-            if validate_input(user_input):
+            try:
+                validate_input(user_input)
                 return ScreenStates.VALID_INPUT_ADD
-            return ScreenStates.INVALID_INPUT_ADD
+            except:
+                return ScreenStates.INVALID_INPUT_ADD
         
         elif screen_state == ScreenStates.INVALID_INPUT_ADD:
             return ScreenStates.ADD_TOURN
@@ -156,19 +217,85 @@ def handle_input(user_input, screen_state):
         
         elif screen_state == ScreenStates.INVALID_INPUT_FIRST:
             return ScreenStates.FIRST_TOURN
-
+    
+    return ScreenStates.EXIT_PROG
             
-          
+  
+# Setting up and authorizing access to Google Spreadsheets
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
+gc = gspread.authorize(creds)
+pr = gc.open('Smash Ultimate Power Rankings').sheet1
+top_cells = pr.range(3, 5, 12, 5)
+all_cells = pr.get_all_values()
+    
+# Initializes Challonge
+initialize_challonge()
 
+# Basic Setup for now
+print("Type 'exit' to exit the program!")
+user_input = input('Is this the first tournament of the season? [y/n]: ')
+if str(user_input).lower() == 'y':
+    tourn_str = input('Please input the first Tournament String: ')
+    if (validate_input(tourn_str)):
+        scores = first_time_run(tourn_str, top_cells)
+        update_scores(pr, scores)
+    else:
+        print('invalid tournament string')
+
+while user_input.lower() != 'exit':
+    all_cells = pr.get_all_values()
+    top_cells = pr.range(3, 5, 12, 5)
+    print("Type 'exit' to exit the program!")
+    user_input = input('Would you like to enter another tournament? [y/n]: ') 
+    if str(user_input).lower() == 'y':
+        tourn_str = input('Please input the Tournament String: ')
+        if (validate_input(tourn_str)):
+            scores = updated_scores(tourn_str, all_cells, top_cells)
+            update_scores(pr, scores)
+        else:
+            print('invalid tournament string')
+    
+    elif str(user_input).lower() == 'clear':
+        clear_scores(pr)
+    elif user_input.lower() == 'n':
+        user_input = 'exit'
+
+        
+'''
 def main():
     # Setting up and authorizing access to Google Spreadsheets
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
     gc = gspread.authorize(creds)
     pr = gc.open('Smash Ultimate Power Rankings').sheet1
+    top_cells = pr.range(3, 5, 12, 5)
+    all_cells = pr.get_all_values()
     
     # Initializes Challonge
     initialize_challonge()
+    
+    user_input = input('Is this the first tournament of the season? [y/n]: ')
+    if str(user_input).lower() == 'y':
+        tourn_str = input('Please input the first Tournament String: ')
+        if (validate_input(tourn_str)):
+            scores = first_time_run(tourn_str, top_cells)
+            update_scores(pr, scores)
+        else:
+            print('invalid tournament string')
+        
+    elif str(user_input).lower() == 'n':
+        tourn_str = input('Please input the Tournament String: ')
+        if (validate_input(tourn_str)):
+            scores = updated_scores(tourn_str, all_cells, top_cells)
+            update_scores(pr, scores)
+        else:
+            print('invalid tournament string')
+    
+    
+    #clear_scores(pr)
+    
+    
     
     # Constants
     screen_state = ScreenStates.MAIN_MENU
@@ -176,7 +303,13 @@ def main():
     us_options = ['Add Completed Tournament', 'First Completed Tournament', 'Back']
     rs_options = ['Update Top 10', 'Back']
     fs_options = ['Google Stuff', 'Back']
-    options = [mm_options, us_options, rs_options, fs_options]
+    list_options = [
+            ScreenStates.MAIN_MENU, 
+            ScreenStates.UPDATE_SCORES, 
+            ScreenStates.FIRST_SETUP,
+            ScreenStates.ROLLOVER_SEASON
+    ]
+    options = [mm_options, us_options, rs_options, fs_options, list_options]
     
     # Variables
     user_input = ''
@@ -191,12 +324,13 @@ def main():
             user_input = input()
         screen_state = handle_input(user_input, screen_state)
     
-    exit()
+    #quit()
+    '''
 
 
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+    #main()
     
 '''
 TOURN_STR = 'utn1lyez'

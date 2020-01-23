@@ -8,6 +8,10 @@ Created on Tue Apr  2 09:46:55 2019
 import challonge
 from access_data import username, api_key
 
+TOP2_WIN_POINT = 3
+TOP35_WIN_POINT = 2
+TOP610_WIN_POINT = 1
+
 def initialize_challonge():
     challonge.set_credentials(username, api_key)
 
@@ -29,7 +33,7 @@ def list_participants(participants):
 def participant_name(participants, p_id):
     for parti in participants:
         if parti['id'] == p_id:
-            return parti['name']
+            return str(parti['name'])
     return None
 
 def determine_matchups(participants, matches, top):
@@ -42,28 +46,36 @@ def determine_matchups(participants, matches, top):
         p1 = participant_name(participants, score[0])
         p2 = participant_name(participants, score[2])
         if p1 != None and p2 != None:
+            print(p1, p2)
             # Checks if someone in top 2 lost to someone outside of top 2
             if p1 in top[:2] or p2 in top[:2]:
-                if p1 in top[:2] and not p2 in top[:2] and score[3] > 0:
-                    point_changes[p1] -= 10 * score[3]
-                    point_changes[p2] += 5 * score[3]
-                elif p2 in top[:2] and not p1 in top[:2] and score[1] > 0:
-                    point_changes[p2] -= 10 * score[1]
-                    point_changes[p1] += 5 * score[1]
+                if (p1 in top[:2] and p2 not in top[:2]) and score[3] > 0:
+                    #point_changes[p1] -= (3 + score[3])
+                    point_changes[p2] += (TOP2_WIN_POINT + score[3])
+                    print(p2, TOP2_WIN_POINT + score[3])
+                elif (p2 in top[:2] and p1 not in top[:2]) and score[1] > 0:
+                    #point_changes[p2] -= (3 + score[1])
+                    point_changes[p1] += (TOP2_WIN_POINT + score[1])
+                    print(p1, TOP2_WIN_POINT + score[1])
             # Checks if someone in top 3-5 lost to someone outside of top 3-5
             elif p1 in top[2:5] or p2 in top[2:5]:
-                if p1 in top[2:5] and not p2 in top[:5] and score[3] > 0:
-                    point_changes[p1] -= 5 * score[3]
-                    point_changes[p2] += 3 * score[3]
-                elif p2 in top[2:5] and not p1 in top[:5] and score[1] > 0:
-                    point_changes[p2] -= 5 * score[1]
-                    point_changes[p1] += 3 * score[1]
+                if (p1 in top[2:5] and p2 not in top[:5]) and score[3] > 0:
+                    #point_changes[p1] -= (2 + score[3])
+                    point_changes[p2] += (TOP35_WIN_POINT + score[3])
+                    print(p2, TOP35_WIN_POINT + score[3])
+                elif (p2 in top[2:5] and p1 not in top[:5]) and score[1] > 0:
+                    #point_changes[p2] -= (2 + score[1])
+                    point_changes[p1] += (TOP35_WIN_POINT + score[1])
+                    print(p1, TOP35_WIN_POINT + score[1])
             # Checks if someone beats someone in top 10 if top 10
             elif p1 in top[5:10] or p2 in top[5:10]:
-                if p1 in top[5:10] and not p2 in top[:10]:
-                    point_changes[p2] += 2 * score[3]
-                elif p2 in top[5:10] and not p1 in top[:10]:
-                    point_changes[p1] += 2 * score[1]
+                if (p1 in top[5:10] and p2 not in top[:10]) and score[3] > 0:
+                    point_changes[p2] += (TOP610_WIN_POINT + score[3])
+                    print(p2, TOP610_WIN_POINT + score[3])
+                elif (p2 in top[5:10] and p1 not in top[:10]) and score[1] > 0:
+                    point_changes[p1] += (TOP610_WIN_POINT + score[1])
+                    print(p1, TOP35_WIN_POINT + score[1])
+    print(point_changes)
     return sorted(point_changes.items(), key=lambda x: x[1], reverse=True)
     
 def grab_winloss(match):
@@ -83,6 +95,7 @@ def calculate_rank_points(participants):
         # Adds bonus pts for winning, Helps winning players partially compensate for points lost to others
         if parti['final-rank'] <= 4:
             point_dict[parti['name']] += bonus_pts(tourn_level(entrants), parti['final-rank'])
+    print(point_dict)
     return sorted(point_dict.items(), key=lambda x: x[1], reverse=True)
     
 def adjust_for_matchups(rank_points, point_changes):
@@ -119,18 +132,18 @@ def tourn_level(num_people):
 
 def bonus_pts(tourn_level, rank):
     if rank == 1:
-        return 7 * tourn_level
+        return 20 * tourn_level
     elif rank == 2:
-        return 5 * tourn_level
+        return 15 * tourn_level
     elif rank == 3:
-        return 3 * tourn_level
+        return 12 * tourn_level
     elif rank == 4:
-        return tourn_level
+        return 10 * tourn_level
     else:
         return 0
 
 def calc_diff(num_people, tourn_level):
-    return round((max_pts(tourn_level) / (1.15 * num_people)) * tourn_level)
+    return round((max_pts(tourn_level) / (1.15 * num_people)) * (tourn_level // 2))
 
 def calc_top_pts(num_people, tourn_level, rank):
     return max_pts(tourn_level) - ((rank - 1) * calc_diff(num_people, tourn_level))
